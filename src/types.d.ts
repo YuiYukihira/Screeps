@@ -5,7 +5,7 @@ interface EmpireMemory {
 }
 
 interface ColonyMemory {
-  controller: string;
+  mainSpawn: string;
   mainRoom: string;
   expansionRooms: string[];
   creeps: string[];
@@ -15,12 +15,10 @@ interface ColonyMemory {
 // memory extension samples
 interface CreepMemory {
   role: string;
-  room: string;
-  working: boolean;
 }
 
 interface Memory {
-  empire: EmpireMemory;
+  empire: EmpireMemory | null;
 }
 
 // `global` extension samples
@@ -28,11 +26,4 @@ declare namespace NodeJS {
   interface Global {
     log: any;
   }
-}
-
-// Types
-interface IColony {
-  controller: StructureController;
-  mainRoom: Room;
-  expansionRooms: Room[];
 }
