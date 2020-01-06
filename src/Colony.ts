@@ -1,71 +1,64 @@
-import _ from 'lodash';
-import Tasks from 'creep-tasks';
+import _ from "lodash";
+import Tasks from "creep-tasks";
+import { HarvestService } from "services/HarvestService";
+import { UpgradeService } from "services/UpgradeService";
 
 export class Colony {
+  name: string;
   mainSpawn: StructureSpawn;
   mainRoom: Room;
   expansionRooms: Room[];
   creeps: Creep[];
   sources: Source[];
+  wishlist: { priority: number; element: ProtoCreep }[];
 
   creepsByRole: { [role: string]: Creep[] };
 
+  harvestService: HarvestService;
+  upgradeService: UpgradeService;
+
   constructor(
+    name: string,
     mainSpawn: StructureSpawn,
     mainRoom: Room,
     expansionRooms: Room[],
-    creeps: Creep[],
-    sources: Source[]
+    sources: Source[],
+    wishlist: { priority: number; element: ProtoCreep }[]
   ) {
+    this.name = name;
     this.mainSpawn = mainSpawn;
     this.mainRoom = mainRoom;
     this.expansionRooms = expansionRooms;
-    this.creeps = creeps;
+    this.creeps = _.filter(Game.creeps, c => c.memory.colony == this.name);
     this.sources = sources;
+    this.wishlist = wishlist;
 
-    this.creepsByRole = _.groupBy(creeps, e => e.memory.role);
+    this.creepsByRole = _.groupBy(this.creeps, e => e.memory.role);
+
+    this.harvestService = new HarvestService(this);
+    this.upgradeService = new UpgradeService(this);
   }
 
   run(): void {
-    if (this.creepsByRole["harvester"].length < 4) {
-      this.mainSpawn.spawnCreep([WORK, CARRY, MOVE], 'Harvester' + Game.time, { memory: { role: 'harverster', task: null } });
-    } else if (this.creepsByRole["upgrader"].length < 2) {
-      this.mainSpawn.spawnCreep([WORK, CARRY, MOVE], 'Upgrader' + Game.time, { memory: { role: 'upgrader', task: null } });
-    }
+    this.harvestService.run();
+    this.upgradeService.run();
 
-    for (let upgrader of this.creepsByRole["upgrader"]) {
-      if (upgrader.isIdle) {
-        RoleUpgrader.newTask(upgrader, this.mainRoom.controller!, this.mainSpawn);
-      }
-    }
-    for (let harverster of this.creepsByRole["harvester"]) {
-      if (harverster.isIdle) {
-        RoleHarvester.newTask(harverster, this.sources);
-      }
+    if (this.wishlist.length > 0) {
+      this.buildFromWishlist();
     }
   }
-}
 
-
-class RoleHarvester {
-  static newTask(creep: Creep, sources: Source[]): void {
-    if (creep.carry.energy < creep.carryCapacity) {
-      let unattendedSource = _.filter(sources, s => s.targetedBy.length == 0)[0];
-      if (unattendedSource) {
-        creep.task = Tasks.harvest(unattendedSource);
-      } else {
-        creep.task = Tasks.harvest(sources[0]);
-      }
-    }
+  private buildFromWishlist(): void {
+    this.wishlist = _.sortBy(this.wishlist, e => e.priority);
+    let proto = this.wishlist.shift()!.element;
+    this.mainSpawn.spawnCreep(proto.body, proto.name, { memory: proto.memory });
   }
-}
 
-class RoleUpgrader {
-  static newTask(creep: Creep, controller: StructureController, spawn: StructureSpawn): void {
-    if (creep.carry.energy > 0) {
-      creep.task = Tasks.upgrade(controller);
-    } else {
-      creep.task = Tasks.withdraw(spawn, RESOURCE_ENERGY);
+  addToWishlist(body: ProtoCreep, priority: number): boolean {
+    if (this.wishlist.length >= 4) {
+      return false;
     }
+    this.wishlist.push({ priority: priority, element: body });
+    return true;
   }
 }

@@ -9,11 +9,13 @@ export class Mem {
 
   static serializeColony(colony: Colony): ColonyMemory {
     return {
+      name: colony.name,
       mainSpawn: colony.mainSpawn.id,
       mainRoom: colony.mainRoom.name,
       expansionRooms: _.map(colony.expansionRooms, i => i.name),
       creeps: _.map(colony.creeps, i => i.id),
-      sources: _.map(colony.sources, i => i.id)
+      sources: _.map(colony.sources, i => i.id),
+      wishlist: colony.wishlist
     };
   }
 
@@ -26,8 +28,14 @@ export class Mem {
     let mainSpawn = Game.getObjectById<StructureSpawn>(memory.mainSpawn)!;
     let mainRoom = Game.rooms[memory.mainRoom];
     let expansionRooms = _.map(memory.expansionRooms, i => Game.rooms[i]);
-    let creeps = _.map(memory.creeps, i => Game.getObjectById<Creep>(i)!);
     let sources = _.map(memory.sources, i => Game.getObjectById<Source>(i)!);
-    return new Colony(mainSpawn, mainRoom, expansionRooms, creeps, sources);
+    return new Colony(
+      memory.name,
+      mainSpawn,
+      mainRoom,
+      expansionRooms,
+      sources,
+      memory.wishlist ? memory.wishlist : []
+    );
   }
 }

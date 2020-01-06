@@ -1,10 +1,10 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 
-import Tasks from 'creep-tasks';
+import Tasks from "creep-tasks";
 import { Empire } from "Empire";
-import _ from 'lodash';
+import _ from "lodash";
 import { Colony } from "Colony";
-import { Mem } from 'utils/Memory';
+import { Mem } from "utils/Memory";
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
@@ -31,7 +31,7 @@ function buildEmpire(): Empire {
     let room = spawn.room;
     let creeps = room.find(FIND_MY_CREEPS);
     let sources = room.find(FIND_SOURCES);
-    return new Colony(spawn, spawn.room, [], creeps, sources);
+    return new Colony("Colony1", spawn, spawn.room, [], sources, []);
   });
   return new Empire(colonies);
 }
