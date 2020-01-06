@@ -2,6 +2,7 @@ import _ from "lodash";
 import Tasks from "creep-tasks";
 import { HarvestService } from "services/HarvestService";
 import { UpgradeService } from "services/UpgradeService";
+import { TransportService } from "services/TransportService";
 
 export class Colony {
   name: string;
@@ -16,6 +17,7 @@ export class Colony {
 
   harvestService: HarvestService;
   upgradeService: UpgradeService;
+  transportService: TransportService;
 
   constructor(
     name: string,
@@ -37,11 +39,13 @@ export class Colony {
 
     this.harvestService = new HarvestService(this);
     this.upgradeService = new UpgradeService(this);
+    this.transportService = new TransportService(this);
   }
 
   run(): void {
     this.harvestService.run();
     this.upgradeService.run();
+    this.transportService.run();
 
     if (this.wishlist.length > 0) {
       this.buildFromWishlist();
