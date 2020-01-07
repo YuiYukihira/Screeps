@@ -5,9 +5,10 @@ export abstract class Service {
   abstract getName(): string;
   creeps: Creep[];
   colony: Colony;
+  memory: any;
 
-  constructor(colony: Colony) {
-    this.creeps = _.get(colony.creepsByRole, this.getName(), []);
+  constructor(colony: Colony, creeps: Creep[]) {
+    this.creeps = creeps;
     this.colony = colony;
   }
 
@@ -15,6 +16,7 @@ export abstract class Service {
   abstract runCreepLogic(creep: Creep): void;
 
   run(): void {
+    console.log(this.getName() + " start");
     this.runSpawnLogic();
     for (let creep of this.creeps) {
       if (creep.isIdle) {
@@ -22,5 +24,6 @@ export abstract class Service {
       }
       creep.run();
     }
+    console.log(this.getName() + " end");
   }
 }

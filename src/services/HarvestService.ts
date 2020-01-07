@@ -1,14 +1,27 @@
 import { Service } from "services/Service";
 import _ from "lodash";
-import Tasks from "creep-tasks";
+import { Tasks } from "../creep-tasks/Tasks";
+import { Colony } from "Colony";
 
 export class HarvestService extends Service {
   getName() {
-    return "harvester";
+    return "harvester" + this.source.id;
+  }
+  source: Source;
+  harvestLocations: RoomPosition[];
+
+  constructor(colony: Colony, creeps: Creep[], source: Source, harvestLocations?: RoomPosition[]) {
+    super(colony, creeps);
+    this.source = source;
+    if (harvestLocations) {
+      this.harvestLocations = harvestLocations;
+    } else {
+      this.harvestLocations = source.pos.availableNeighbors();
+    }
   }
 
   runSpawnLogic(): void {
-    if (this.creeps.length < 4) {
+    if (this.creeps.length < this.harvestLocations.length) {
       this.colony.addToWishlist(
         {
           body: [WORK, MOVE, CARRY],
@@ -22,13 +35,12 @@ export class HarvestService extends Service {
 
   runCreepLogic(creep: Creep) {
     if (creep.carry.energy < creep.carryCapacity) {
-      let source = _.sortBy(this.colony.sources, [(s: Source) => s.targetedBy.length])[0];
-      creep.task = Tasks.harvest(source);
+      creep.task = Tasks.harvest(this.source);
     } else {
-      if (_.get(this.colony.creepsByRole, "transporter", []).length > 0) {
+      if (this.colony.transportService.creeps.length > 0) {
         creep.task = Tasks.drop(creep.pos, RESOURCE_ENERGY);
       } else {
-        creep.task = Tasks.transfer(this.colony.mainSpawn, "energy");
+        creep.task = Tasks.transfer(this.colony.mainSpawn, RESOURCE_ENERGY);
       }
     }
   }

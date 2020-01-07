@@ -1,6 +1,6 @@
 import { Service } from "services/Service";
 import _ from "lodash";
-import Tasks from "creep-tasks";
+import { Tasks } from "creep-tasks/Tasks";
 
 export class TransportService extends Service {
   getName() {
@@ -11,7 +11,7 @@ export class TransportService extends Service {
     if (this.creeps.length < 4) {
       this.colony.addToWishlist(
         {
-          body: [MOVE, CARRY],
+          body: [MOVE, MOVE, CARRY],
           name: "Transporter" + Game.time,
           memory: { role: this.getName(), colony: this.colony.name, task: null }
         },
@@ -27,7 +27,15 @@ export class TransportService extends Service {
       })[0];
       creep.task = Tasks.pickup(resource);
     } else {
-      creep.task = Tasks.transfer(this.colony.mainSpawn, RESOURCE_ENERGY);
+      if (this.colony.mainSpawn.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+        creep.task = Tasks.transfer(this.colony.mainSpawn, RESOURCE_ENERGY);
+      } else {
+        let extensions = this.colony.mainRoom.find(FIND_STRUCTURES, { filter: { structureType: STRUCTURE_EXTENSION } });
+        let available = _.filter(extensions, (e: StructureExtension) => e.store.getFreeCapacity() > 0) as StructureExtension[];
+        if (available.length > 0) {
+          creep.task = Tasks.transfer(available[0], RESOURCE_ENERGY);
+        }
+      }
     }
   }
 }

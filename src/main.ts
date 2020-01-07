@@ -1,22 +1,22 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 
-import Tasks from "creep-tasks";
+import 'creep-tasks/prototypes';
 import { Empire } from "Empire";
 import _ from "lodash";
 import { Colony } from "Colony";
-import { Mem } from "utils/Memory";
+import { Traveler } from 'utils/Traveler';
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
+Traveler.toString();
 export const loop = ErrorMapper.wrapLoop(() => {
   let empire;
   if (Memory.empire == null) {
     empire = buildEmpire();
   } else {
-    empire = Mem.deserializeEmpire(Memory.empire);
+    empire = new Empire(Memory.empire);
   }
   empire.run();
-  Memory.empire = Mem.serializeEmpire(empire);
 
   // Automatically delete memory of missing creeps
   for (const name in Memory.creeps) {
@@ -29,9 +29,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
 function buildEmpire(): Empire {
   let colonies = _.map(Game.spawns, spawn => {
     let room = spawn.room;
-    let creeps = room.find(FIND_MY_CREEPS);
-    let sources = room.find(FIND_SOURCES);
-    return new Colony("Colony1", spawn, spawn.room, [], sources, []);
+    let creeps = _.map(room.find<FIND_MY_CREEPS>(FIND_MY_CREEPS), c => c.name);
+    let sources = _.map(room.find<FIND_SOURCES>(FIND_SOURCES), s => s.id);
+    return { name: "Colony1", mainSpawn: spawn.id, mainRoom: room.name, expansionRooms: [], creeps: creeps, sources: sources, wishlist: [] }
   });
-  return new Empire(colonies);
+  return new Empire({ colonies: colonies, hostileRooms: [] });
 }

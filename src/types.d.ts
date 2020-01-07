@@ -2,6 +2,7 @@
 
 interface EmpireMemory {
   colonies: ColonyMemory[];
+  hostileRooms: any;
 }
 
 interface ColonyMemory {
@@ -18,6 +19,11 @@ interface ColonyMemory {
 interface CreepMemory {
   role: string;
   colony: string;
+  _trav?: any;
+}
+
+interface RoomMemory {
+  avoid: number;
 }
 
 interface Memory {

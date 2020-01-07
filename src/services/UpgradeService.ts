@@ -1,6 +1,6 @@
 import { Service } from "services/Service";
 import _ from "lodash";
-import Tasks from "creep-tasks";
+import { Tasks } from "creep-tasks/Tasks";
 
 export class UpgradeService extends Service {
   getName() {
@@ -11,7 +11,7 @@ export class UpgradeService extends Service {
     if (this.creeps.length < 2) {
       this.colony.addToWishlist(
         {
-          body: [WORK, MOVE, CARRY],
+          body: [WORK, MOVE, MOVE, CARRY],
           name: "Upgrader" + Game.time,
           memory: { role: this.getName(), colony: this.colony.name, task: null }
         },
