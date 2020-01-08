@@ -8,7 +8,6 @@ export class UpgradeService extends Service {
   }
 
   runSpawnLogic(): void {
-    console.log("c.1");
     if (this.creeps.length < 2) {
       this.colony.addToWishlist(
         {
@@ -22,7 +21,6 @@ export class UpgradeService extends Service {
   }
 
   runCreepLogic(creep: Creep) {
-    console.log("c.2");
     if (creep.carry.energy > 0) {
       creep.task = Tasks.upgrade(this.colony.mainRoom.controller!);
     } else {

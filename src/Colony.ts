@@ -95,17 +95,12 @@ export class Colony {
     for (let harvestService of this.harvestServices) {
       harvestService.run();
     }
-    console.log("c");
     this.upgradeService.run();
-    console.log("c.5");
     //this.transportService.run();
     this.builderService.run();
-    console.log("d");
     if (this.wishlist.length > 0) {
-      console.log("buildy buildy");
       this.buildFromWishlist();
     }
-    console.log("e");
   }
 
   private buildFromWishlist(): void {
@@ -117,9 +112,6 @@ export class Colony {
       y += 1;
     });
     let proto = this.wishlist.shift()!.element;
-    console.log(proto);
-    console.log(proto.body);
-    console.log(proto.name);
     console.log(this.mainSpawn.spawnCreep(proto.body, proto.name, { memory: proto.memory }));
   }
 

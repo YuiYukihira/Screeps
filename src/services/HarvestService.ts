@@ -39,7 +39,6 @@ export class HarvestService extends Service {
   }
 
   runSpawnLogic(): void {
-    console.log("a");
     // find missing creeps from pairs.
     let ids = _.map(this.source.pos.availableNeighbors(), (p: RoomPosition) => {
       return { p: p, n: this.getID(p) };
@@ -125,31 +124,18 @@ export class HarvestService extends Service {
   }
 
   runCreepLogic(creep: Creep) {
-    console.log("b");
-    console.log("c: " + creep.name);
-    console.log(creep.memory.service);
-    console.log(creep.memory.service.data);
-    console.log(creep.memory.service.data!.pos);
-    console.log(creep.memory.service.data!.pos.x);
-    console.log(creep.memory.service.data!.pos.y);
-    console.log(creep.memory.service.data!.pos.r);
     let p = new RoomPosition(
       creep.memory.service.data!.pos.x,
       creep.memory.service.data!.pos.y,
       creep.memory.service.data!.pos.r
     );
-    console.log("b.1");
-    console.log("p:" + p);
     if (creep.memory.service.role == "HARVESTER") {
       if (creep.store.getFreeCapacity() > 0) {
-        console.log("harvest");
         creep.task = Tasks.harvest(this.source);
       } else {
         if (this.pairs[creep.memory.service.data!.pair].hauler) {
-          console.log("drop");
           creep.task = Tasks.drop(creep.pos, RESOURCE_ENERGY);
         } else {
-          console.log("dropoff");
           let dropofflocation = creep.pos.findClosestByRange<FIND_MY_STRUCTURES>(FIND_MY_STRUCTURES, {
             filter: s => {
               return (
@@ -160,13 +146,11 @@ export class HarvestService extends Service {
               );
             }
           }) as StructureStorage | StructureSpawn | StructureExtension;
-          console.log(dropofflocation);
           creep.task = Tasks.transfer(dropofflocation, RESOURCE_ENERGY);
         }
       }
     } else if (creep.memory.service.role == "HAULER") {
       if (creep.store.getUsedCapacity() > 0) {
-        console.log("dropoff");
         let dropofflocation = creep.pos.findClosestByRange<FIND_MY_STRUCTURES>(FIND_MY_STRUCTURES, {
           filter: s => {
             return (
@@ -177,18 +161,13 @@ export class HarvestService extends Service {
             );
           }
         }) as StructureStorage | StructureSpawn | StructureExtension;
-        console.log(dropofflocation);
         creep.task = Tasks.transfer(dropofflocation, RESOURCE_ENERGY);
       } else {
-        console.log("pickup");
         let resource = creep.room.find<FIND_DROPPED_RESOURCES>(FIND_DROPPED_RESOURCES, {
           filter: r => {
-            console.log(p);
-            console.log(r.pos);
             return r.pos.x == p.x && r.pos.y == p.y && r.pos.roomName == p.roomName;
           }
         })[0];
-        console.log(resource);
         if (!resource) {
           creep.task = Tasks.goTo(this.colony.parkLocation);
         } else {
@@ -196,6 +175,5 @@ export class HarvestService extends Service {
         }
       }
     }
-    console.log("c");
   }
 }
