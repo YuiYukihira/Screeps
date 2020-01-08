@@ -161,7 +161,11 @@ export class HarvestService extends Service {
             );
           }
         }) as StructureStorage | StructureSpawn | StructureExtension;
-        creep.task = Tasks.transfer(dropofflocation, RESOURCE_ENERGY);
+        if (!dropofflocation) {
+          creep.task = Tasks.goTo(this.colony.parkLocation);
+        } else {
+          creep.task = Tasks.transfer(dropofflocation, RESOURCE_ENERGY);
+        }
       } else {
         let resource = creep.room.find<FIND_DROPPED_RESOURCES>(FIND_DROPPED_RESOURCES, {
           filter: r => {

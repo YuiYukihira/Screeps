@@ -20846,6 +20846,7 @@ class HarvestService extends Service {
     }
     runCreepLogic(creep) {
         let p = new RoomPosition(creep.memory.service.data.pos.x, creep.memory.service.data.pos.y, creep.memory.service.data.pos.r);
+        console.log(creep.name);
         if (creep.memory.service.role == "HARVESTER") {
             if (creep.store.getFreeCapacity() > 0) {
                 creep.task = Tasks.harvest(this.source);
@@ -20877,7 +20878,12 @@ class HarvestService extends Service {
                             s.store.getFreeCapacity(RESOURCE_ENERGY) > 0);
                     }
                 });
-                creep.task = Tasks.transfer(dropofflocation, RESOURCE_ENERGY);
+                if (!dropofflocation) {
+                    creep.task = Tasks.goTo(this.colony.parkLocation);
+                }
+                else {
+                    creep.task = Tasks.transfer(dropofflocation, RESOURCE_ENERGY);
+                }
             }
             else {
                 let resource = creep.room.find(FIND_DROPPED_RESOURCES, {
