@@ -4,16 +4,17 @@ import { Tasks } from "creep-tasks/Tasks";
 
 export class UpgradeService extends Service {
   getName() {
-    return "upgrader";
+    return "upgrade";
   }
 
   runSpawnLogic(): void {
+    console.log("c.1");
     if (this.creeps.length < 2) {
       this.colony.addToWishlist(
         {
           body: [WORK, MOVE, MOVE, CARRY],
           name: "Upgrader" + Game.time,
-          memory: { role: this.getName(), colony: this.colony.name, task: null }
+          memory: { colony: this.colony.name, task: null, service: { name: this.getName(), role: "UPGRADER" } }
         },
         2
       );
@@ -21,6 +22,7 @@ export class UpgradeService extends Service {
   }
 
   runCreepLogic(creep: Creep) {
+    console.log("c.2");
     if (creep.carry.energy > 0) {
       creep.task = Tasks.upgrade(this.colony.mainRoom.controller!);
     } else {

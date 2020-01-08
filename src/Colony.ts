@@ -4,13 +4,13 @@ import { UpgradeService } from "services/UpgradeService";
 import { TransportService } from "services/TransportService";
 import { BuilderService } from "services/BuilderService";
 
-type wishlist = { priority: number, element: ProtoCreep }[];
+type wishlist = { priority: number; element: ProtoCreep }[];
 export class Colony {
   private memory: ColonyMemory;
 
   harvestServices: HarvestService[];
   upgradeService: UpgradeService;
-  transportService: TransportService;
+  //transportService: TransportService;
   builderService: BuilderService;
 
   parkLocation: RoomPosition;
@@ -18,11 +18,16 @@ export class Colony {
   constructor(memory: ColonyMemory) {
     this.memory = memory;
 
-    this.harvestServices = _.map(this.sources, s => new HarvestService(this, _.get(this.creepsByRole, "harvester" + s.id, []), s));
-    this.upgradeService = new UpgradeService(this, _.get(this.creepsByRole, "upgrader", []));
-    this.transportService = new TransportService(this, _.get(this.creepsByRole, "transporter", []));
-    let conSites = _.map(this.mainRoom.find(FIND_CONSTRUCTION_SITES), c => { return { priority: 0, element: c } });
-    this.builderService = new BuilderService(this, _.get(this.creepsByRole, "builder", []), conSites);
+    this.harvestServices = _.map(
+      this.sources,
+      s => new HarvestService(this, _.get(this.creepsByService, "harvest" + s.id, []), s)
+    );
+    this.upgradeService = new UpgradeService(this, _.get(this.creepsByService, "upgrade", []));
+    //this.transportService = new TransportService(this, _.get(this.creepsByRole, "transport", []));
+    let conSites = _.map(this.mainRoom.find(FIND_CONSTRUCTION_SITES), c => {
+      return { priority: 0, element: c };
+    });
+    this.builderService = new BuilderService(this, _.get(this.creepsByService, "build", []), conSites);
     this.parkLocation = Game.flags["Park" + this.mainRoom.name].pos;
   }
 
@@ -82,27 +87,34 @@ export class Colony {
     this.memory.wishlist = value;
   }
 
-  get creepsByRole(): Dictionary<Creep[]> {
-    return _.groupBy(this.creeps, c => c.memory.role);
+  get creepsByService(): Dictionary<Creep[]> {
+    return _.groupBy(this.creeps, (c: Creep) => c.memory.service.name);
   }
 
   run(): void {
     for (let harvestService of this.harvestServices) {
       harvestService.run();
     }
+    console.log("c");
     this.upgradeService.run();
-    this.transportService.run();
+    console.log("c.5");
+    //this.transportService.run();
     this.builderService.run();
-
+    console.log("d");
     if (this.wishlist.length > 0) {
+      console.log("buildy buildy");
       this.buildFromWishlist();
     }
+    console.log("e");
   }
 
   private buildFromWishlist(): void {
     this.wishlist = _.sortBy(this.wishlist, e => e.priority);
     let proto = this.wishlist.shift()!.element;
-    this.mainSpawn.spawnCreep(proto.body, proto.name, { memory: proto.memory });
+    console.log(proto);
+    console.log(proto.body);
+    console.log(proto.name);
+    console.log(this.mainSpawn.spawnCreep(proto.body, proto.name, { memory: proto.memory }));
   }
 
   addToWishlist(body: ProtoCreep, priority: number): boolean {
