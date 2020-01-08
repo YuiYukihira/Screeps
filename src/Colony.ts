@@ -110,6 +110,12 @@ export class Colony {
 
   private buildFromWishlist(): void {
     this.wishlist = _.sortBy(this.wishlist, e => e.priority);
+    let vis = new RoomVisual(this.mainRoom.name);
+    let y = 1;
+    _.forEach(this.wishlist, e => {
+      vis.text(e.priority + ": " + e.element.name, 5, y, { font: 1 });
+      y += 1;
+    });
     let proto = this.wishlist.shift()!.element;
     console.log(proto);
     console.log(proto.body);
