@@ -103,16 +103,14 @@ Object.defineProperty(RoomPosition.prototype, "neighbors", {
   }
 });
 
-Object.defineProperty(RoomPosition.prototype, "isVisible", {
-  get: function() {
-    return this.roomName in _.keys(Game.rooms);
-  }
-});
+RoomPosition.prototype.isVisible = function() {
+  return this.roomName in _.keys(Game.rooms);
+};
 
 RoomPosition.prototype.isPassible = function(ignoreCreeps = false): boolean {
   // Is terrain passable?
-  if (Game.map.getTerrainAt(this) == "wall") return false;
-  if (this.isVisible) {
+  if (Game.rooms[this.roomName].getTerrain().get(this.x, this.y) == TERRAIN_MASK_WALL) return false;
+  if (this.isVisible()) {
     // Are there creeps?
     if (ignoreCreeps == false && this.lookFor(LOOK_CREEPS).length > 0) return false;
     // Are there structures?

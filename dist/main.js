@@ -20612,16 +20612,14 @@ Object.defineProperty(RoomPosition.prototype, "neighbors", {
         return adjPos;
     }
 });
-Object.defineProperty(RoomPosition.prototype, "isVisible", {
-    get: function () {
-        return this.roomName in lodash.keys(Game.rooms);
-    }
-});
+RoomPosition.prototype.isVisible = function () {
+    return this.roomName in lodash.keys(Game.rooms);
+};
 RoomPosition.prototype.isPassible = function (ignoreCreeps = false) {
     // Is terrain passable?
-    if (Game.map.getTerrainAt(this) == "wall")
+    if (Game.rooms[this.roomName].getTerrain().get(this.x, this.y) == TERRAIN_MASK_WALL)
         return false;
-    if (this.isVisible) {
+    if (this.isVisible()) {
         // Are there creeps?
         if (ignoreCreeps == false && this.lookFor(LOOK_CREEPS).length > 0)
             return false;
@@ -20846,7 +20844,6 @@ class HarvestService extends Service {
     }
     runCreepLogic(creep) {
         let p = new RoomPosition(creep.memory.service.data.pos.x, creep.memory.service.data.pos.y, creep.memory.service.data.pos.r);
-        console.log(creep.name);
         if (creep.memory.service.role == "HARVESTER") {
             if (creep.store.getFreeCapacity() > 0) {
                 creep.task = Tasks.harvest(this.source);
